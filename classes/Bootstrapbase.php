@@ -14,6 +14,7 @@ class Bootstrapbase
     public $beta=false;
     public $admin=false;
     public $system=[];
+    protected $json_return=false;
     
     public function __construct($config)
     {
@@ -129,6 +130,7 @@ class Bootstrapbase
     
     public function run($method='get')
     {
+	$this->json_return=true;
 	
         $part = substr($_SERVER['REQUEST_URI'], 1+strlen(dirname($_SERVER['SCRIPT_NAME'])));
         if ($pos = strpos($part, '?')) $part = substr($part, 0, $pos);
@@ -225,7 +227,8 @@ class Bootstrapbase
 	$this->system('total');
 	unset($this->system['start']);
 	$result['x_system']=$this->system;
-	if ($die) die(json_encode($result,JSON_NUMERIC_CHECK));
+	if ($die && $this->json_return) die(json_encode($result,JSON_NUMERIC_CHECK));
+	if ($die) mydie($result,'Result');
 	return $result;
     }
 
