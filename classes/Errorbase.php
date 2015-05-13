@@ -2,7 +2,7 @@
 
 class Errorbase {
     protected static $err = array(
-        0  => 'ID not found',
+        0  => 'Class file not found',
         1  => 'No configuration file',
         2  => 'Unknown method',
     );

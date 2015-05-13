@@ -1,6 +1,5 @@
 <?php
-include_once __DIR__.'/../class/Tools.php';
-include_once __DIR__.'/../models/rateModel.php';
+
 
 class Controller {
     protected $id,$data,$name,$parts;
@@ -28,6 +27,7 @@ class Controller {
     
     public function get()
     {
+	return $this->status([]);
         
     }
 
@@ -58,7 +58,6 @@ class Controller {
         $ret=array('status'=>$status);
         if ($data || is_array($data))
         {
-            if (is_array($data)) Tools::change_datetime($data);
             $ret[$name] = $data;
         }
         return $ret;
@@ -130,28 +129,6 @@ class Controller {
 	return file_get_contents($url, false, $ctx);
     }
     
-    protected function _get_user($user_id)
-    {
-        $token='user:'.$user_id;
-        
-        if ($ret=Tools::memcache($token)) return $ret;
-        
-        $user=new userModel($user_id);
-        
-        if (!$user->id) return false;
-        $ret=[];
-        foreach (['firstname','lastname','url','photo','about','gender','title','vip','lang'] AS $k) $ret[$k]=$user->$k;
-        
-        
-        $ratemodel=new rateModel();
-	$rate=$ratemodel->user($user_id);
-	
-	$ret['rate']=['rate'=>0+$rate,'prc'=>round(20*$rate),'count'=>0+$ratemodel->user_count($user_id)];
-	
-        
-        return Tools::memcache($token,$ret);
-        
-    }
     
     protected function data($i)
     {
@@ -159,51 +136,8 @@ class Controller {
         return null;
     }
     
-    protected function strtotime($t)
-    {
-        $delta=0+Bootstrap::$main->session('time_delta');
-        $ret=strtotime($t);
-        if (substr($t,-1)!='Z') $ret-=$delta;
-        return $ret;
-    }
     
-    
-    protected function referers($url,$title='',$user=null)
-    {
-        $title=trim($title);
-        $media = array(
-            'facebook' => array( 'url'=>'https://www.facebook.com/sharer/sharer.php?u={url}&t='.urlencode($title)),
-            'gplus' => array( 'url'=>'https://plus.google.com/share?url={url}'),
-            'linkedin' => array( 'url'=>'http://www.linkedin.com/shareArticle?mini=true&url={url}&title='.urlencode($title).'&summary=&source={url}'),
-            'twitter' => array( 'url'=>'https://twitter.com/intent/tweet?source={url}&text=:%20{url}'),
-            /*'tumblr' => array( 'url'=>'http://www.tumblr.com/share?v=3&u={url}&t='.urlencode($title).'&s='),
-            'pinterest' => array( 'url'=>'http://pinterest.com/pin/create/button/?url={url}&description='.urlencode($title)),
-            'getpocket' => array( 'url'=>'https://getpocket.com/save?url={url}&title='.urlencode($title)),
-            'reddit' => array( 'url'=>'http://www.reddit.com/submit?url={url}&title='.urlencode($title)),
-            'pinboard' => array( 'url'=>'https://pinboard.in/popup_login/?url={url}&title=&description='),
-            */
-            'blog' => array( 'url'=>'{url}&embedded=js'),
-            'mail' => array( 'url'=>'mailto:?subject='.urlencode($title).'&body={url}'),
-        );
-        
-        $u=isset(Bootstrap::$main->user['id'])?Bootstrap::$main->user['id']:$user;
-        $root=Bootstrap::$main->getConfig('app.root');
-        $res=[];
-        foreach ($media AS $s=>$m)
-        {
-            $url2=$root.$url.(strstr($url,'?')?'&':'?');
-            $referer=['s'=>$s];
-            if ($u) $referer['u']=$u;
-            $url2.='referer='.urlencode(base64_encode(json_encode($referer,JSON_NUMERIC_CHECK)));
-            $type='popup';
-            if (strstr($m['url'],'mailto:')) $type='mailto';
-            if (strstr($m['url'],'embedded=js')) $type='blog';
-            if (!strstr($m['url'],'embedded=js')) $url2=urlencode($url2);
-            $res[]=['id'=>$s,'type'=>$type,'url'=>str_replace('{url}',$url2,$m['url'])];
-        }
-        
-        return $res;
-    }
+
     
     protected function nav_array($search_limit)
     {
@@ -213,13 +147,7 @@ class Controller {
         return $opt;
     }
     
-    protected function clear_review(&$review)
-    {
-        $review['editable']=isset(Bootstrap::$main->user['id']) && Bootstrap::$main->user['id']==$review['user'];
-        foreach (['host','event'] AS $field) unset($review[$field]);
-        if (!$review['editable']) unset($review['id']);
-        foreach (['food','cleanliness','atmosphere','overall'] AS $field) $review[$field.'_prc']=round($review[$field]*20);          
-    }
+
     
     protected function check_input($arrays=[],$data=null)
     {
@@ -237,38 +165,6 @@ class Controller {
         }
     }
     
-    protected function require_fb_friend($user_id,$error=true)
-    {
-	if ( !isset(Bootstrap::$main->user['fb_id']) || !Bootstrap::$main->user['fb_id'] || !isset(Bootstrap::$main->user['fb_friend']) || !Bootstrap::$main->user['fb_friend'])
-	{
-	    Bootstrap::$main->session('fb_friends',1);
-	    return $error?$this->error(72):72;
-	}
-	
-	require_once __DIR__.'/../models/userModel.php';
-	$user=new userModel($user_id);
-	$him=$user->fb_id;
-	$me=Bootstrap::$main->user['fb_id'];
-	
-	if (!Bootstrap::$main->session('fb_access_token'))
-	{
-	    $config=Bootstrap::$main->getConfig();
-	    $url='https://graph.facebook.com/oauth/access_token';
-	    $url.='?client_id='.$config['fb.app_id'];
-	    $url.='&client_secret='.$config['fb.app_secret'];
-	    $url.='&grant_type=client_credentials&scope=user_friends';
-	    
-	    parse_str($this->req($url),$token);
-	    if (isset($token['access_token'])) Bootstrap::$main->session('fb_access_token',$token['access_token']);
-	}
-	$url='https://graph.facebook.com/v2.3/'.$me.'/friends/'.$him.'?access_token='.Bootstrap::$main->session('fb_access_token');
-	$friends=json_decode(file_get_contents($url),true);
-    
-	if (!isset($friends['data']) || !count($friends['data']))
-	    return $error?$this->error(73):73;
-	    
-    
-	return 0;
-    }
 
+    
 }

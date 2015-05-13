@@ -161,11 +161,7 @@ class Bootstrapbase
 
 	if (!strlen($parts[0])) $parts[0] = 'index';
 	$controller_name=$parts[0];
-	$controller_file=__DIR__.'/controllers/'.$controller_name.'Controller.php';
-	if (!file_exists($controller_file)) $this->result(array('name'=>$controller_name),2);
-	
-	require_once $controller_file;
-	
+
         
 	$id=0;
 
@@ -196,12 +192,6 @@ class Bootstrapbase
 	    $controller_method.='_'.$parts[1];
 	}
 	
-	if ($this->debug) {
-	    $this->debug['id']=$id;
-	    $this->debug['data']=$data;
-	    $this->debug['controller']=$controller_name;
-	    $this->debug['controller_method']=$controller_method;
-	}
 	
 	$result=$controller->$controller_method();
 	
@@ -221,7 +211,7 @@ class Bootstrapbase
     public function result($result,$error=null,$die=true)
     {
         header("Content-Type: application/json; charset=utf8");
-        if (!is_array($result)) $result=array();
+        if (!is_array($result)) $result=array('result'=>$result);
 	
         if (!is_null($error))
 	{
