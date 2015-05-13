@@ -1,6 +1,8 @@
 <?php
-    function allow_origin(Array $referers)
+    function allow_origin($referers)
     {
+        if (!is_array($referers)) $referers=[$referers];
+        
         if (isset($_SERVER['HTTP_REFERER'])) {
             $referer=strtolower($_SERVER['HTTP_REFERER']);
             $pos=strpos($referer,'//');

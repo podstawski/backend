@@ -1,6 +1,5 @@
 <?php
 
-
 function autoload(Array $set_include_path=[])
 {
     set_include_path(implode(PATH_SEPARATOR, array_merge([
