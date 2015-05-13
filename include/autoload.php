@@ -11,9 +11,7 @@ function autoload(Array $set_include_path=[])
     
     spl_autoload_register(function ($name) {
         $file_to_include=str_replace('_', '/', $name) . '.php';
-        
         include_once $file_to_include;
-        mydie(get_include_path(),$file_to_include);
     });
 }
 

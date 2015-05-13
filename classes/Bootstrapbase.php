@@ -162,7 +162,7 @@ class Bootstrapbase
 	if (!strlen($parts[0])) $parts[0] = 'index';
 	$controller_name=$parts[0];
 	$controller_file=__DIR__.'/controllers/'.$controller_name.'Controller.php';
-	if (!file_exists($controller_file)) self::result(array('name'=>$controller_name),2);
+	if (!file_exists($controller_file)) $this->result(array('name'=>$controller_name),2);
 	
 	require_once $controller_file;
 	
@@ -205,7 +205,7 @@ class Bootstrapbase
 	
 	$result=$controller->$controller_method();
 	
-        self::result($result);
+        $this->result($result);
     }
     
     public function closeConn()
@@ -213,24 +213,28 @@ class Bootstrapbase
         if (is_object($this->conn)) unset($this->conn);
     }
     
+    protected function clear_data(&$data)
+    {
+	
+    }
     
-    public static function result($result,$error=null,$die=true)
+    public function result($result,$error=null,$die=true)
     {
         header("Content-Type: application/json; charset=utf8");
         if (!is_array($result)) $result=array();
 	
         if (!is_null($error))
 	{
+	    
 	    $result['status']=false;
 	    ini_set('display_erros','on');
-	    require_once __DIR__.'/class/Error.php';
 	    $result['error']=Error::e($error);
 
 	}
-	self::clear_data($result);
-	self::$main->system('total');
-	unset(self::$main->system['start']);
-	$result['x_system']=self::$main->system;
+	$this->clear_data($result);
+	$this->system('total');
+	unset($this->system['start']);
+	$result['x_system']=$this->system;
 	if ($die) die(json_encode($result,JSON_NUMERIC_CHECK));
 	return $result;
     }
