@@ -250,4 +250,9 @@ class Bootstrapbase
 	return in_array($this->user['id'],$this->getConfig('admin.ids'));
     }
     
+    public function clearRow(&$data,$hidden_fields=false)
+    {
+	
+    }
+    
 }

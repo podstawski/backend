@@ -1,3 +1,4 @@
+
 <?php
 
 include_once __DIR__.'/../class/Tools.php';
@@ -18,8 +19,7 @@ class Conn {
         {
             if (is_integer($k)) unset($row[$k]);
         }
-        
-        Tools::change_datetime($row,$hidden_fields);
+        Bootstrap::$main->clearRow($row,$hidden_fields);
     }
     
     public function fetchColumn($sql,$a=null)
@@ -100,7 +100,7 @@ class Conn {
 class Model {
     /**
      * @var Conn
-     */     
+    */     
     protected $conn;
     protected $savedData, $data;
     protected $_table = null;
