@@ -116,10 +116,12 @@ class Model {
         if (!is_array($fields) || !isset($fields[$table]) || !count($fields[$table]) ) {
             
             $_data=Tools::memcache('db:'.$table.':fields');
-            if (!$_data)
+            
+            if (!$_data || !count($_data))
             {
                 $db_name=Bootstrap::$main->session('db_name');
                 $sql="SELECT column_name,data_type FROM information_schema.columns WHERE table_schema='".$db_name."' AND table_name='$table'";
+       
                 $f=$this->conn->fetchAll($sql);
                 $a=[];
                 foreach ($f AS $v) $a[$v['column_name']]=$v['data_type'];
@@ -288,8 +290,6 @@ class Model {
         $setvalues=array();
         $wheres=array();
         $wherevalues=array();
-        
-        
         
         
         foreach ($this->data AS $k=>$v) {

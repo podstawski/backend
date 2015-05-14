@@ -68,6 +68,8 @@ function backend_migrate($config_file,$classpath,$ver=null)
          
         $conn->close();
         
+        return $version;
+        
     } catch (Exception $e) {
         die($e->getMessage());
     }

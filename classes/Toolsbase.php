@@ -39,7 +39,7 @@ class Toolsbase {
         }
         $time=0;
         if (file_exists($key_file)) $time=filemtime($key_file);
-        if ($time+($expire_in/10) > Bootstrap::$main->now) return unserialize(file_get_contents($key_file));
+        if ($time+($expire_in/2) > Bootstrap::$main->now) return unserialize(file_get_contents($key_file));
         return false;
     }
 
