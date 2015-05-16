@@ -102,7 +102,7 @@ class Bootstrapbase
 		$this->conn = new PDO($this->config['db.dsn'],$this->config['db.user'],$this->config['db.pass']);
 		$this->system['db']=true;
 	    } catch (Exception $e) {
-		mydie($e);
+		mydie($e,'Connection error');
 	    }
 	    
 	}
