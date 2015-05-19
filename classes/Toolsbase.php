@@ -220,14 +220,26 @@ class Toolsbase {
     }
     
     
-    public static function save($file,$data,$fromfile=null)
+    public static function saveRoot($prefix='')
     {
 	if (Bootstrap::$main->appengine)
 	{
 	    require_once 'google/appengine/api/cloud_storage/CloudStorageTools.php';
 	}
-	$root=Bootstrap::$main->appengine ? 'gs://'.CloudStorageTools::getDefaultGoogleStorageBucketName().'/' : __DIR__.'/../../../media/';
 
+	$root=Bootstrap::$main->appengine ? 'gs://'.CloudStorageTools::getDefaultGoogleStorageBucketName() : Bootstrap::$main->mediaPath();
+	if ($prefix) $root.='/'.$prefix;
+	
+	if (!Bootstrap::$main->appengine && !file_exists(dirname($root))) mkdir(dirname($root),0755,true);
+	return $root;
+    }
+    
+    
+    public static function save($file,$data,$fromfile=null)
+    {
+	
+	$root=self::saveRoot().'/';
+	
 	$file=$root.$file;
 	if (!Bootstrap::$main->appengine)
 	{

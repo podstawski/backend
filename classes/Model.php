@@ -1,7 +1,5 @@
-
 <?php
 
-include_once __DIR__.'/../class/Tools.php';
 
 class Conn {
     protected $conn;

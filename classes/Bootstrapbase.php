@@ -258,4 +258,11 @@ class Bootstrapbase
 	
     }
     
+    public function mediaPath($prefix='')
+    {
+	$path='/tmp';
+	if ($prefix) $path.='/'.$prefix;
+	return $path;
+    }
+    
 }
