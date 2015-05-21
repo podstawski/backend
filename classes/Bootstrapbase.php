@@ -236,6 +236,7 @@ class Bootstrapbase
 
     public function getConfig($index=null)
     {
+	if ($index && !isset($this->config[$index])) return false;
 	if ($index) return $this->config[$index];
 	return $this->config;
     }
