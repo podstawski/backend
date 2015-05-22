@@ -46,7 +46,7 @@ class Conn {
     
     public function fetchAll($sql,$a=null)
     {
-        $rows=$this->execute($sql,$a,true);
+        $rows=$this->execute($sql,$a,true)?:[];
         if (!count($rows)) return false;
         
         foreach ($rows AS &$row) $this->clearRow($row);
