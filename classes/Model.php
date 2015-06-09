@@ -331,19 +331,20 @@ class Model {
                 } else return false;
             }
             
-        } else {   
+        } else {
+            $sql="SELECT max(".$this->getKey().") FROM ".$this->getTable();
+            $id=rand(1,10)+$this->conn->fetchOne($sql);
+            $inserts[]=$this->getKey();
+            $pyt[]='?';
+            $values[]=$id;
             $sql="INSERT INTO ".$this->getTable()." (".implode(',',$inserts).") VALUES (".implode(',',$pyt).")";
             
             if (count($inserts)) {
                 $res=$this->conn->execute($sql,$values);
         
                 if ($res) {
-                    $sql="SELECT ".$this->getKey()." FROM ".$this->getTable()." WHERE ".implode(' AND ',$wheres).' ORDER BY '.$this->getKey().' DESC';
-                    $keyValue=$this->conn->fetchOne($sql,$wherevalues);
-   
                     foreach ($inserts AS $i=>$k) $this->savedData[$k]=$values[$i];
-                    $this->savedData[$key]=$keyValue;
-                    $this->data[$key]=$keyValue;
+                    $this->data[$key]=$id;
                 } else return false;
             }
             
