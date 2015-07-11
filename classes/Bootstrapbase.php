@@ -3,8 +3,8 @@
 class Bootstrapbase
 {
     private static $SESSION_PREFIX = 'backend';
-    private $session_prefix;
-    private $conn,$config,$root;
+    protected $session_prefix;
+    protected $conn,$config,$root;
     public static $main;
     public $ip;
     public $now;
@@ -60,7 +60,7 @@ class Bootstrapbase
     public function system($mod)
     {
 	if (!isset($this->system['traps'])) $this->system['traps']=[];
-	if (!isset($this->system['start'])) $this->system['start']=isset($_SERVER['jemyrazem_start'])?$_SERVER['jemyrazem_start']:microtime(true);
+	if (!isset($this->system['start'])) $this->system['start']=isset($_SERVER['backend_start'])?$_SERVER['backend_start']:microtime(true);
 	$this->system['traps'][sprintf("%02d",count($this->system['traps'])+1).'_'.$mod]=microtime(true)-$this->system['start'];
     }
     
