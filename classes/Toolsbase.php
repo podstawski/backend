@@ -222,59 +222,59 @@ class Toolsbase {
     
     public static function saveRoot($prefix='')
     {
-	if (Bootstrap::$main->appengine)
-	{
-	    require_once 'google/appengine/api/cloud_storage/CloudStorageTools.php';
-	}
-
-	$root=Bootstrap::$main->appengine ? 'gs://'.CloudStorageTools::getDefaultGoogleStorageBucketName() : Bootstrap::$main->mediaPath();
-	if ($prefix) $root.='/'.$prefix;
+		if (Bootstrap::$main->appengine)
+		{
+			require_once 'google/appengine/api/cloud_storage/CloudStorageTools.php';
+		}
 	
-	if (!Bootstrap::$main->appengine && !file_exists(dirname($root))) mkdir(dirname($root),0755,true);
-	return $root;
+		$root=Bootstrap::$main->appengine ? 'gs://'.CloudStorageTools::getDefaultGoogleStorageBucketName() : Bootstrap::$main->mediaPath();
+		if ($prefix) $root.='/'.$prefix;
+		
+		if (!Bootstrap::$main->appengine && !file_exists(dirname($root))) mkdir(dirname($root),0755,true);
+		return $root;
     }
     
     
     public static function save($file,$data,$fromfile=null)
     {
 	
-	$root=self::saveRoot().'/';
-	
-	$file=$root.$file;
-	if (!Bootstrap::$main->appengine)
-	{
-	    @mkdir(dirname($file),0755,true);
-	}
-	
-	if (is_null($fromfile))
-	    file_put_contents($file,$data);
-	else
-	    rename($root.$fromfile,$file);    
+		$root=self::saveRoot().'/';
+		
+		$file=$root.$file;
+		if (!Bootstrap::$main->appengine)
+		{
+			@mkdir(dirname($file),0755,true);
+		}
+		
+		if (is_null($fromfile))
+			file_put_contents($file,$data);
+		else
+			rename($root.$fromfile,$file);    
     }
     
     public static function log($app,$data=null)
     {
 	
-	if (Bootstrap::$main->appengine)
-	{
-	    require_once 'google/appengine/api/cloud_storage/CloudStorageTools.php';
-	}	
-	$root=Bootstrap::$main->appengine ? 'gs://'.CloudStorageTools::getDefaultGoogleStorageBucketName().'/' : __DIR__.'/../../../media/';
-	$file=$root.'log/'.$app.'/'.date('Y').'/'.sprintf('%02d',date('m')).'/'.sprintf('%02d',date('d'));
-
-	$d=date('Y-m-d H:i:s');
-	$f=0;
-	while (file_exists("$file/$d:$f")) $f++;
-	$file="$file/$d:$f";	
+		if (Bootstrap::$main->appengine)
+		{
+			require_once 'google/appengine/api/cloud_storage/CloudStorageTools.php';
+		}	
+		$root=Bootstrap::$main->appengine ? 'gs://'.CloudStorageTools::getDefaultGoogleStorageBucketName().'/' : __DIR__.'/../../../media/';
+		$file=$root.'log/'.$app.'/'.date('Y').'/'.sprintf('%02d',date('m')).'/'.sprintf('%02d',date('d'));
 	
-
+		$d=date('Y-m-d H:i:s');
+		$f=0;
+		while (file_exists("$file/$d:$f")) $f++;
+		$file="$file/$d:$f";	
+		
 	
-	$header=date('Y-m-d H:i:s');
-	if (isset($_SERVER['REMOTE_ADDR'])) $header.=", IP:".$_SERVER['REMOTE_ADDR'];
-	if (isset(Bootstrap::$main->user['email'])) $header.=", email: ".Bootstrap::$main->user['email'];
-	$header.="\n";
-	
-	self::save(substr($file,strlen($root)),$header.print_r($data,1)."\n\n");
+		
+		$header=date('Y-m-d H:i:s');
+		if (isset($_SERVER['REMOTE_ADDR'])) $header.=", IP:".$_SERVER['REMOTE_ADDR'];
+		if (isset(Bootstrap::$main->user['email'])) $header.=", email: ".Bootstrap::$main->user['email'];
+		$header.="\n";
+		
+		self::save(substr($file,strlen($root)),$header.print_r($data,1)."\n\n");
 	
 
     }

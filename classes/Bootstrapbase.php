@@ -59,9 +59,12 @@ class Bootstrapbase
     
     public function system($mod)
     {
-	if (!isset($this->system['traps'])) $this->system['traps']=[];
-	if (!isset($this->system['start'])) $this->system['start']=isset($_SERVER['backend_start'])?$_SERVER['backend_start']:microtime(true);
-	$this->system['traps'][sprintf("%02d",count($this->system['traps'])+1).'_'.$mod]=microtime(true)-$this->system['start'];
+		if (!isset($this->system['traps'])) $this->system['traps']=[];
+		if (!isset($this->system['start'])) $this->system['start']=isset($_SERVER['backend_start'])?$_SERVER['backend_start']:microtime(true);
+		
+		$time=microtime(true)-$this->system['start'];
+		$this->system['traps'][sprintf("%02d",count($this->system['traps'])+1).'_'.$mod]=$time;
+		return $time;
     }
     
     
@@ -130,72 +133,74 @@ class Bootstrapbase
     
     public function run($method='get')
     {
-	$this->json_return=true;
+		$this->json_return=true;
 	
-        $part = substr($_SERVER['REQUEST_URI'], 1+strlen(dirname($_SERVER['SCRIPT_NAME'])));
+		$script_dirname=dirname($_SERVER['SCRIPT_NAME']);
+		if ($script_dirname=='/') $script_dirname='';
+        $part = substr($_SERVER['REQUEST_URI'], 1+strlen($script_dirname));
         if ($pos = strpos($part, '?')) $part = substr($part, 0, $pos);
         $part=preg_replace('~/+~','/',$part);
         $parts = explode('/', $part);
 
 	
-	$data=array();
-	if ($method=='get' || $method=='delete')
-	{
-	    $data=$_GET;
-	}
-	else
-	{
-	    $data=file_get_contents("php://input");
-	    
-	    if ($data && isset($_SERVER['CONTENT_TYPE']))
-	    {
-		if (strstr($_SERVER['CONTENT_TYPE'],'json')) $data=json_decode($data,true);
-		if (strstr($_SERVER['CONTENT_TYPE'],'form-urlencoded')) parse_str($data,$data);
-		if (strstr($_SERVER['CONTENT_TYPE'],'form-data')) parse_str($data,$data);
-	    }
-	    else
-	    {
-		$data=$_REQUEST;
-	    }
-	}
+		$data=array();
+		if ($method=='get' || $method=='delete')
+		{
+			$data=$_GET;
+		}
+		else
+		{
+			$data=file_get_contents("php://input");
+			
+			if ($data && isset($_SERVER['CONTENT_TYPE']))
+			{
+			if (strstr($_SERVER['CONTENT_TYPE'],'json')) $data=json_decode($data,true);
+			if (strstr($_SERVER['CONTENT_TYPE'],'form-urlencoded')) parse_str($data,$data);
+			if (strstr($_SERVER['CONTENT_TYPE'],'form-data')) parse_str($data,$data);
+			}
+			else
+			{
+			$data=$_REQUEST;
+			}
+		}
 	
-	if (is_array($data) && !$this->isAdmin()) foreach($data AS $k=>$v) if ($k[0]=='_') unset($data[$k]);
-
-	if (!strlen($parts[0])) $parts[0] = 'index';
-	$controller_name=$parts[0];
-
-        
-	$id=0;
-
-	if (isset($parts[1]) && $parts[1]+0>0) $id=$parts[1]+0;
-	elseif (isset($parts[2])) $id=$parts[2];
-
-	if (!$id && isset($data['id']))
-	{
-	    $id=$data['id'];
-	    unset($data['id']);
-	}	
+		if (is_array($data) && !$this->isAdmin()) foreach($data AS $k=>$v) if ($k[0]=='_') unset($data[$k]);
 	
+		if (!strlen($parts[0])) $parts[0] = 'index';
+		$controller_name=$parts[0];
 	
-	$controller_name.='Controller';
-	$controller=new $controller_name($id,$data,$parts);
-	$controller->init();
+			
+		$id=0;
 	
-	$this->system('init');
+		if (isset($parts[1]) && $parts[1]+0>0) $id=$parts[1]+0;
+		elseif (isset($parts[2])) $id=$parts[2];
 	
-	$controller_method=$method;
-	
-	if (isset($data['action']) && preg_match('/^[a-z]/i',$data['action']))
-	{
-	    $controller_method.='_'.strtolower($data['action']);
-	}
-	elseif (isset($parts[1]) && preg_match('/^[a-z]/i',$parts[1]))
-	{
-	    $controller_method.='_'.$parts[1];
-	}
-	
-	
-	$result=$controller->$controller_method();
+		if (!$id && isset($data['id']))
+		{
+			$id=$data['id'];
+			unset($data['id']);
+		}	
+		
+		
+		$controller_name.='Controller';
+		$controller=new $controller_name($id,$data,$parts);
+		$controller->init();
+		
+		$this->system('init');
+		
+		$controller_method=$method;
+		
+		if (isset($data['action']) && preg_match('/^[a-z]/i',$data['action']))
+		{
+			$controller_method.='_'.strtolower($data['action']);
+		}
+		elseif (isset($parts[1]) && preg_match('/^[a-z]/i',$parts[1]))
+		{
+			$controller_method.='_'.$parts[1];
+		}
+		
+		
+		$result=$controller->$controller_method();
 	
         $this->result($result);
     }
@@ -224,9 +229,10 @@ class Bootstrapbase
 
 	}
 	$this->clear_data($result);
-	$this->system('total');
+	$total=$this->system('total');
 	unset($this->system['start']);
 	$result['x_system']=$this->system;
+	$result['x_system']['total_time']=round($total,2);
 	if ($die && $this->json_return) die(json_encode($result,JSON_NUMERIC_CHECK));
 	if ($die) mydie($result,'Result');
 	return $result;
