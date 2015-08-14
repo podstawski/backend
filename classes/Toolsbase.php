@@ -259,7 +259,7 @@ class Toolsbase {
 		{
 			require_once 'google/appengine/api/cloud_storage/CloudStorageTools.php';
 		}	
-		$root=Bootstrap::$main->appengine ? 'gs://'.CloudStorageTools::getDefaultGoogleStorageBucketName().'/' : __DIR__.'/../../../media/';
+		$root=Bootstrap::$main->appengine ? 'gs://'.CloudStorageTools::getDefaultGoogleStorageBucketName().'/' : Bootstrap::$main->mediaPath().'/';
 		$file=$root.'log/'.$app.'/'.date('Y').'/'.sprintf('%02d',date('m')).'/'.sprintf('%02d',date('d'));
 	
 		$d=date('Y-m-d H:i:s');
