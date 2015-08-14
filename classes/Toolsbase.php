@@ -262,10 +262,10 @@ class Toolsbase {
 		$root=Bootstrap::$main->appengine ? 'gs://'.CloudStorageTools::getDefaultGoogleStorageBucketName().'/' : Bootstrap::$main->mediaPath().'/';
 		$file=$root.'log/'.$app.'/'.date('Y').'/'.sprintf('%02d',date('m')).'/'.sprintf('%02d',date('d'));
 	
-		$d=date('Y-m-d H:i:s');
+		$d=date('Y-m-d_H-i-s');
 		$f=0;
-		while (file_exists("$file/$d:$f")) $f++;
-		$file="$file/$d:$f";	
+		while (file_exists("$file/$d-$f.txt")) $f++;
+		$file="$file/$d-$f.txt";	
 		
 	
 		
