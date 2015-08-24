@@ -421,7 +421,7 @@ class Model {
     }
     
 
-    public function join($field,$table,$tablefield,$join='left')
+    public function join($field,$table,$tablefield='id',$join='left')
     {
         switch(strtolower($join))
         {
