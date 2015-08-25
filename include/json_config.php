@@ -14,7 +14,7 @@
             else
             {
                 $config_file=strtolower($_SERVER['HTTP_HOST']);
-            }        
+            }   
     
             $f=dirname($application_json).'/'.$config_file.'.json';
             
@@ -22,6 +22,20 @@
             {
                 $config=array_merge($config,json_decode(file_get_contents($f),true));
             }
+            
+            $f='';
+            if (isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER'] )
+            {
+                $ref=[];
+                preg_match('~^http[^:]*://([^/]+)/~',$_SERVER['HTTP_REFERER'],$ref);
+                if (isset($ref[1])) $f=dirname($application_json).'/'.$ref[1].'.json';
+            }
+            
+            if ($f && file_exists($f))
+            {
+                $config=array_merge($config,json_decode(file_get_contents($f),true));
+            }
+            
         }
 
         if (!$deeparray) return $config;
