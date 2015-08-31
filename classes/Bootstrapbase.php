@@ -18,42 +18,42 @@ class Bootstrapbase
     
     public function __construct($config)
     {
-	$this->system['start']=isset($_SERVER['backend_start'])?$_SERVER['backend_start']:microtime(true);
-	$this->system['db']=false;
-	$postfix=isset($_SERVER['APPLICATION_ID'])?$_SERVER['APPLICATION_ID']:__DIR__;
+		$this->system['start']=isset($_SERVER['backend_start'])?$_SERVER['backend_start']:microtime(true);
+		$this->system['db']=false;
+		$postfix=isset($_SERVER['APPLICATION_ID'])?$_SERVER['APPLICATION_ID']:__DIR__;
         $this->session_prefix = self::$SESSION_PREFIX . '_' . md5($postfix);
         self::$main = $this;
         $this->now = time();
         $this->ip = isset($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : (isset($_SERVER['REMOTE_ADDR'])?$_SERVER['REMOTE_ADDR']:'0.0.0.0');
-	$this->config=$config;
+		$this->config=$config;
     
-	if (isset($_SERVER['REQUEST_URI']))
-	{
-	    $uri = $_SERVER['REQUEST_URI'];
-	    $root = dirname($_SERVER['SCRIPT_NAME']);
-    
-	    $uri = str_replace($root, '', $uri);
-	    if ($root != '/') $root .= '/';
-    
-	    $this->root = $root;
-	}
-	else $root='/';
+		if (isset($_SERVER['REQUEST_URI']))
+		{
+			$uri = $_SERVER['REQUEST_URI'];
+			$root = dirname($_SERVER['SCRIPT_NAME']);
+		
+			$uri = str_replace($root, '', $uri);
+			if ($root != '/') $root .= '/';
+		
+			$this->root = $root;
+		}
+		else $root='/';
 	
     
-	$pos=strpos($this->config['db.dsn'],'dbname=');
-	if ($pos) $this->session('db_name',substr($this->config['db.dsn'],$pos+7));
+		$pos=strpos($this->config['db.dsn'],'dbname=');
+		if ($pos) $this->session('db_name',substr($this->config['db.dsn'],$pos+7));
+		
+		$this->user=$this->session('user');
 	
-	$this->user=$this->session('user');
-
-	
-	if (isset($_SERVER['SERVER_SOFTWARE']) && strstr(strtolower($_SERVER['SERVER_SOFTWARE']),'engine'))
-	{
-	    $this->appengine=true;
-	    if (isset($_SERVER['APPLICATION_ID']) && strstr($_SERVER['APPLICATION_ID'],'beta')) $this->beta=true;
-	}
-	else {
-	    $this->beta=true;
-	}
+		
+		if (isset($_SERVER['SERVER_SOFTWARE']) && strstr(strtolower($_SERVER['SERVER_SOFTWARE']),'engine'))
+		{
+			$this->appengine=true;
+			if (isset($_SERVER['APPLICATION_ID']) && strstr($_SERVER['APPLICATION_ID'],'beta')) $this->beta=true;
+		}
+		else {
+			$this->beta=true;
+		}
     }
 
     
@@ -76,7 +76,7 @@ class Bootstrapbase
         $langs = $this->langs();
 
         // break up string into pieces (languages and q factors)
-	$alang=isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])?$_SERVER['HTTP_ACCEPT_LANGUAGE']:'en';
+		$alang=isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])?$_SERVER['HTTP_ACCEPT_LANGUAGE']:'en';
         preg_match_all('/([a-z]{1,8}(-[a-z]{1,8})?)\s*(;\s*q\s*=\s*(1|0\.[0-9]+))?/i',$alang , $matches);
 
         if (count($matches[1])) {
@@ -128,7 +128,7 @@ class Bootstrapbase
     
     public function logout()
     {
-	$_SESSION[$this->session_prefix]=array();
+		$_SESSION[$this->session_prefix]=array();
     }
     
     public function run($method='get')
@@ -138,10 +138,10 @@ class Bootstrapbase
 		$script_dirname=dirname($_SERVER['SCRIPT_NAME']);
 		if ($script_dirname=='/') $script_dirname='';
         $part = substr($_SERVER['REQUEST_URI'], 1+strlen($script_dirname));
+
         if ($pos = strpos($part, '?')) $part = substr($part, 0, $pos);
         $part=preg_replace('~/+~','/',$part);
         $parts = explode('/', $part);
-
 	
 		$data=array();
 		if ($method=='get' || $method=='delete')
@@ -154,13 +154,13 @@ class Bootstrapbase
 			
 			if ($data && isset($_SERVER['CONTENT_TYPE']))
 			{
-			if (strstr($_SERVER['CONTENT_TYPE'],'json')) $data=json_decode($data,true);
-			if (strstr($_SERVER['CONTENT_TYPE'],'form-urlencoded')) parse_str($data,$data);
-			if (strstr($_SERVER['CONTENT_TYPE'],'form-data')) parse_str($data,$data);
+				if (strstr($_SERVER['CONTENT_TYPE'],'json')) $data=json_decode($data,true);
+				if (strstr($_SERVER['CONTENT_TYPE'],'form-urlencoded')) parse_str($data,$data);
+				if (strstr($_SERVER['CONTENT_TYPE'],'form-data')) parse_str($data,$data);
 			}
 			else
 			{
-			$data=$_REQUEST;
+				$data=$_REQUEST;
 			}
 		}
 	
