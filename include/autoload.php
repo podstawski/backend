@@ -11,7 +11,7 @@ function autoload(Array $set_include_path=[])
     
     spl_autoload_register(function ($name) {
         $file_to_include=str_replace('_', '/', $name) . '.php';
-        include_once $file_to_include;
+        @include_once $file_to_include;
         if (!class_exists($name) && !interface_exists($name)) Bootstrap::$main->result(['file'=>$file_to_include,'path'=>get_include_path()],0);
     });
 }
