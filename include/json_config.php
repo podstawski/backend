@@ -11,17 +11,30 @@
             {
                 $config_file=str_replace('~','-',$_SERVER['APPLICATION_ID']);
             }
-            else
-            {
-                $config_file=strtolower($_SERVER['HTTP_HOST']);
-            }   
+             
     
             $f=dirname($application_json).'/'.$config_file.'.json';
             
             if (file_exists($f))
             {
+                
+                //echo $f; print_r(json_decode(file_get_contents($f),true));
                 $config=array_merge($config,json_decode(file_get_contents($f),true));
             }
+            
+            if (isset($_SERVER['HTTP_HOST']) && strlen($_SERVER['HTTP_HOST']))
+            {
+                $config_file=strtolower($_SERVER['HTTP_HOST']);
+            }
+            
+            $f=dirname($application_json).'/'.$config_file.'.json';
+            
+            if (file_exists($f))
+            {
+                //echo $f; print_r(json_decode(file_get_contents($f),true));
+                $config=array_merge($config,json_decode(file_get_contents($f),true));
+            }
+            
             
             $f='';
             if (isset($_SERVER['HTTP_REFERER']) && $_SERVER['HTTP_REFERER'] )
@@ -38,6 +51,8 @@
             
         }
 
+        //mydie($config);
+        
         if (!$deeparray) return $config;
 
 
