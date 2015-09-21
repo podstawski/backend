@@ -20,11 +20,12 @@ class Toolsbase {
 			$memcache = new Memcache;
 		}
 	
-		$key_file=self::saveRoot('memcache/'.md5($key).'.txt');
+		$key_file=self::saveRoot('memcache/'.$key.'.txt');
 		if (!is_null($val))
 		{
-			if ($memcache) $memcache->set($key,array('v'=>$val,'t'=>Bootstrap::$main->now+$expire_in));
-			file_put_contents($key_file,serialize($val));
+			$put=array('v'=>$val,'t'=>Bootstrap::$main->now+$expire_in);
+			if ($memcache) $memcache->set($key,$put);
+			file_put_contents($key_file,json_encode($put,JSON_NUMERIC_CHECK));
 			return $val;
 		}
 			
@@ -37,7 +38,7 @@ class Toolsbase {
 		}
 			
         if (file_exists($key_file)) {
-			$val=unserialize(file_get_contents($key_file));
+			$val=json_decode(file_get_contents($key_file),true);
 			if (isset($val['t']) && $val['t'] > Bootstrap::$main->now) return $val['v'];
 		}
 		return false;
