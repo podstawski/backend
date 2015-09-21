@@ -14,33 +14,33 @@ class Toolsbase {
 
     public static function memcache($key,$val=null,$expire_in=1800)
     {
+		$memcache=null;
         if (isset($_SERVER['SERVER_SOFTWARE']) && strstr(strtolower($_SERVER['SERVER_SOFTWARE']),'engine'))
-	{
-	    $memcache = new Memcache;
-	    if (!is_null($val))
-	    {
-		$memcache->set($key,array('v'=>$val,'t'=>Bootstrap::$main->now+$expire_in));
-		return $val;
-	    }
-	    $val=$memcache->get($key);
-	    if ($val===false) return false;
-	    if ($val['t'] > Bootstrap::$main->now) return $val['v'];
-	    return false;
-	    
-	}
-        
-        $key_file=sys_get_temp_dir().'/'.md5($_SERVER['HTTP_HOST'].$key).'.memcache';
-        if (!is_null($val))
-        {
-	    
-            file_put_contents($key_file,serialize($val));
-	    //mydie($val,"$key:$key_file");
-            return $val;
-        }
-        $time=0;
-        if (file_exists($key_file)) $time=filemtime($key_file);
-        if ($time+($expire_in/2) > Bootstrap::$main->now) return unserialize(file_get_contents($key_file));
-        return false;
+		{
+			$memcache = new Memcache;
+		}
+	
+		$key_file=self::saveRoot('memcache/'.md5($key).'.txt');
+		if (!is_null($val))
+		{
+			if ($memcache) $memcache->set($key,array('v'=>$val,'t'=>Bootstrap::$main->now+$expire_in));
+			file_put_contents($key_file,serialize($val));
+			return $val;
+		}
+			
+		
+		if ($memcache)
+		{
+			$val=$memcache->get($key);
+			if (isset($val['t']) && $val['t'] > Bootstrap::$main->now) return $val['v'];
+			if (isset($val['t'])) return false;
+		}
+			
+        if (file_exists($key_file)) {
+			$val=unserialize(file_get_contents($key_file));
+			if (isset($val['t']) && $val['t'] > Bootstrap::$main->now) return $val['v'];
+		}
+		return false;
     }
 
     public static function str_to_url($s, $case = 0, $dots=false)
