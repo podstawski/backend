@@ -8,12 +8,13 @@ class Controller {
     
     public function __construct($id=0,$data=[],$parts=[])
     {
+		
         $this->id=$id;
         $this->data=$data;
         $this->parts=$parts;
         $this->name = str_ireplace('controller','',get_class($this));
         $this->_appengine=Bootstrap::$main->appengine;
-    }
+	}
     
     
     public function __call($name,$args)

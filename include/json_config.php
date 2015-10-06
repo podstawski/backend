@@ -49,13 +49,12 @@
             }
 
             $f='';
-            if (isset($_GET['_site']) && $_GET['_site'] )
+            if (isset($_REQUEST['_site']) && $_REQUEST['_site'] )
             {
-                $config_file=strtolower($_GET['_site']);
+                $config_file=strtolower($_REQUEST['_site']);
                 $config_file=str_replace('..','',$config_file);
                 $f=dirname($application_json).'/'.$config_file.'.json';
             }
-            
             if ($f && file_exists($f))
             {
                 $config=array_merge($config,json_decode(file_get_contents($f),true));
@@ -64,7 +63,6 @@
             
         }
 
-        //mydie($config);
         
         if (!$deeparray) return $config;
 
