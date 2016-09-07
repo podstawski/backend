@@ -8,8 +8,8 @@ class Toolsbase {
     
     public static function semaphore($key,$set=null)
     {
-	$key='sem:'.md5($key);
-	return self::memcache($key,$set);
+		$key='sem:'.md5($key);
+		return self::memcache($key,$set);
     }
 
     public static function memcache($key,$val=null,$expire_in=1800)
@@ -319,5 +319,35 @@ class Toolsbase {
 	}
 
 	
+	public static function mail($mail) {
+		if (Bootstrap::$main->appengine)
+		{
+			
+			$mail_options = [
+				"sender" => Bootstrap::$main->getConfig('mail.sender'),
+				"to" => $mail['to'],
+				"subject" => $mail['subject'],
+				"htmlBody" => $mail['msg'],
+				"replyto" => $mail['from'],
+				"header" => ['Resent-From'=>$mail['from']]
+			];	    
+			
+			try {
+				$message = new Message($mail_options);
+	
+				return $message->send();
+			} catch (Exception $e) {
+				return false;
+			}
+		}
+		else
+		{
+			
+
+			return mail($mail['to'],$mail['subject'],$mail['msg'],$mail['header']);
+	
+		}
+
+	}
 	
 }
