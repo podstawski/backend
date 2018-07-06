@@ -77,6 +77,7 @@ class Conn {
             $q=$this->getConn()->prepare($sql);
             $res=$q->execute($a);
         }
+
     
         //if (!$query) Bootstrap::$main->debug($sql,$a,$res);
         if (!isset(Bootstrap::$main->system[$token])) Bootstrap::$main->system[$token]=0;
@@ -185,7 +186,7 @@ class Model {
 
             $where = array();
             foreach ($args AS $arg) {
-                $where[] = "$what=?";
+                $where[] = "`$what`=?";
             }
 
             $sql .= ' WHERE (' . implode(' OR ', $where).')';
@@ -263,15 +264,20 @@ class Model {
         if (count($where))
         {
             $w=$this->where($where);
+            if ($this->join)
+                $w['where'] = preg_replace('~`([^. =]+)`~','`'.$this->getTable().'`.`\\1`',$w['where']);
             $sql.=" WHERE ".$w['where'];
             $values=$w['values'];
         }
         
-        if ($order) $sql.=" ORDER BY $order";
+        if ($order) {
+            if ($this->join)
+                $order = preg_replace('~`([^. =]+)`~','`'.$this->getTable().'`.`\\1`',$order);
+            $sql.=" ORDER BY $order";
+        }
         if ($limit) $sql.=" LIMIT $limit";
         if ($offset) $sql.=" OFFSET $offset";
-   
-             
+
         return $this->conn->fetchAll($sql,$values);
     }
     
@@ -296,13 +302,13 @@ class Model {
             
             if (!strlen($v) && !strstr(strtolower($this->_fields[$k]),'char') && !strstr(strtolower($this->_fields[$k]),'text')) $v=null;
             
-            $inserts[]=$k;
+            $inserts[]="`$k`";
             $values[]=$v;
             $pyt[]='?';
             
             if( isset($this->savedData[$k]) && !strlen($this->savedData[$k])) $this->savedData[$k]=null;
             if (is_array($this->savedData) && (!array_key_exists($k,$this->savedData) || $this->savedData[$k] !== $v)) {
-                $sets[]="$k=?";
+                $sets[]="`$k`=?";
                 $setvalues[]=strlen($v)?$v:null;
             }
             
@@ -452,14 +458,14 @@ class Model {
             if (is_array($v) && count($v)==2)
             {
                 $where_v[]=$v[1];
-                $where_k[]=$k.$v[0]."?";                    
+                $where_k[]="`$k`".$v[0]."?";
             }
             else
             {
-                if (is_null($v)) $where_k[]="$k IS NULL";
+                if (is_null($v)) $where_k[]="`$k` IS NULL";
                 else {
                     $where_v[]=$v;
-                    $where_k[]="$k=?";
+                    $where_k[]="`$k`=?";
                 }
             }
         }
