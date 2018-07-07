@@ -441,9 +441,9 @@ class Model {
                 $this->join.=' INNER';
                 break;
         }
-        $this->join.=' JOIN '.$table.' ON '.$this->getTable().'.'.$field.'='.$table.'.'.$tablefield;
+        $this->join.=' JOIN `'.$table.'` ON `'.$this->getTable().'`.`'.$field.'`=`'.$table.'`.`'.$tablefield.'`';
   
- 
+
         return $this;
         
     }
